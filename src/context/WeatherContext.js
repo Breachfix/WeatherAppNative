@@ -1,69 +1,81 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { getWeatherByCity, getForecastByCity } from '../utils/api';
-import * as Location from 'expo-location'; // For geolocation
-
+import axios from 'axios';
+import * as Location from 'expo-location';
+import { API_KEY } from '@env';
 export const WeatherContext = createContext();
 
 export const WeatherProvider = ({ children }) => {
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState([]);
+  const [currentWeather, setCurrentWeather] = useState({});
   const [error, setError] = useState(null);
   const [unit, setUnit] = useState('metric');
   const [lastSearchedCity, setLastSearchedCity] = useState(null);
+  
 
-  // Fetch weather data by city name
+  const apiKey = API_KEY; // Replace with your API key
+
+  // Fetch weather based on city
   const fetchWeather = async (city) => {
+    setError(null);
+    setLastSearchedCity(city);
     try {
-      const data = await getWeatherByCity(city);
-      console.log('Fetched weather data:', data); // Debugging log
-      setWeatherData(data);
-      setLastSearchedCity(city);
+      const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
+        params: {
+          q: city,
+          appid: apiKey,
+          units: unit,
+        },
+      });
+      setWeatherData(response.data);
+      setCurrentWeather(response.data); // Set current weather for sunrise/sunset
     } catch (err) {
-      console.error('Error fetching weather data:', err);
       setError('Could not fetch weather data. Please try again.');
     }
   };
-  
 
-  // Fetch forecast data by city name
+  // Fetch forecast data based on city
   const fetchForecast = async (city) => {
+    setError(null);
     try {
-      const data = await getForecastByCity(city);
-      console.log('Fetched forecast data:', data); // Debugging log
-      setForecastData(data);
+      const response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast`, {
+        params: {
+          q: city,
+          appid: apiKey,
+          units: unit,
+        },
+      });
+      setForecastData(response.data.list);
     } catch (err) {
-      console.error('Error fetching forecast data:', err);
       setError('Could not fetch forecast data. Please try again.');
     }
   };
-  
 
-  // Fetch weather by geolocation
-  const fetchWeatherByLocation = async () => {
+  // Fetch weather based on location coordinates
+  const fetchWeatherByLocation = async (lat, lon) => {
+    setError(null);
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setError('Permission to access location was denied.');
-        return;
-      }
-
-      const location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
-      const response = await api.get('/weather', {
-        params: { lat: latitude, lon: longitude, units: unit },
+      const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
+        params: {
+          lat,
+          lon,
+          appid: apiKey,
+          units: unit,
+        },
       });
       setWeatherData(response.data);
+      setCurrentWeather(response.data);
     } catch (err) {
-      setError('Could not fetch location-based weather. Please try again.');
+      setError('Could not fetch weather data. Please try again.');
     }
   };
 
-  // Toggle temperature units
+  // Toggle unit and refetch data for consistency
   const toggleUnit = () => {
     setUnit((prevUnit) => (prevUnit === 'metric' ? 'imperial' : 'metric'));
   };
 
-  // Refetch data on unit change
+  // Refetch weather and forecast data on unit change, if a city was searched
   useEffect(() => {
     if (lastSearchedCity) {
       fetchWeather(lastSearchedCity);
@@ -71,14 +83,37 @@ export const WeatherProvider = ({ children }) => {
     }
   }, [unit]);
 
+  // Use geolocation to get weather data based on the user's current location
+  useEffect(() => {
+    const getLocationWeather = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setError('Permission to access location was denied.');
+        return;
+      }
+
+      try {
+        const location = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = location.coords;
+        fetchWeatherByLocation(latitude, longitude);
+      } catch (err) {
+        setError('Could not fetch location-based weather. Please try again.');
+      }
+    };
+
+    if (!lastSearchedCity) {
+      getLocationWeather();
+    }
+  }, [lastSearchedCity, unit]);
+
   return (
     <WeatherContext.Provider
       value={{
         weatherData,
         forecastData,
+        currentWeather,
         fetchWeather,
         fetchForecast,
-        fetchWeatherByLocation,
         toggleUnit,
         unit,
         error,

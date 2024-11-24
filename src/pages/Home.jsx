@@ -1,34 +1,23 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   SafeAreaView,
+  ScrollView,
   View,
   Text,
   StyleSheet,
   Button,
   ActivityIndicator,
-  ScrollView,
 } from 'react-native';
 import { WeatherContext } from '../context/WeatherContext';
 import SearchBar from '../components/SearchBar';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 const Home = () => {
-  const {
-    weatherData,
-    forecastData,
-    fetchForecast,
-    toggleUnit,
-    unit,
-    error,
-  } = useContext(WeatherContext);
-
-  const [isLoading, setIsLoading] = useState(false);
+  const { weatherData, forecastData, fetchForecast, toggleUnit, unit, error } =
+    useContext(WeatherContext);
 
   useEffect(() => {
-    if (weatherData) {
-      setIsLoading(true);
-      fetchForecast(weatherData.name).finally(() => setIsLoading(false));
-    }
+    if (weatherData) fetchForecast(weatherData.name);
   }, [weatherData, unit]);
 
   return (
@@ -54,22 +43,35 @@ const Home = () => {
                 Temperature: {weatherData.main.temp}°{unit === 'metric' ? 'C' : 'F'}
               </Text>
             </View>
+            <View style={styles.weatherDetail}>
+              <Icon name="tint" style={styles.icon} />
+              <Text>Humidity: {weatherData.main.humidity}%</Text>
+            </View>
+            <View style={styles.weatherDetail}>
+              <Icon name="wind" style={styles.icon} />
+              <Text>Wind Speed: {weatherData.wind.speed} {unit === 'metric' ? 'm/s' : 'mph'}</Text>
+            </View>
+            <View style={styles.weatherDetail}>
+              <Icon name="moon" style={styles.icon} />
+              <Text>Sunset: {new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}</Text>
+            </View>
           </View>
         )}
         {forecastData && (
           <View>
             <Text style={styles.title}>Forecast</Text>
-            {isLoading ? (
-              <ActivityIndicator size="large" color="#007AFF" />
-            ) : (
-              forecastData.map((forecast, index) => (
-                <View key={index} style={styles.forecastItem}>
-                  <Text>
-                    {forecast.date}: {forecast.temp}°{unit === 'metric' ? 'C' : 'F'}
-                  </Text>
-                </View>
-              ))
-            )}
+            {forecastData.map((forecast, index) => (
+              <View key={index} style={styles.forecastItem}>
+                <Text>
+                  Date: {new Date(forecast.dt_txt).toLocaleDateString()}{" "}
+                  {new Date(forecast.dt_txt).toLocaleTimeString()}
+                </Text>
+                <Text>
+                  Temp: {forecast.main.temp}°{unit === 'metric' ? 'C' : 'F'}
+                </Text>
+                <Text>Humidity: {forecast.main.humidity}%</Text>
+              </View>
+            ))}
           </View>
         )}
       </ScrollView>
