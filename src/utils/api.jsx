@@ -1,14 +1,25 @@
 import axios from 'axios';
+import { API_KEY } from '@env'; // Install react-native-dotenv for this
 
-const API_URL = 'https://api.openweathermap.org/data/2.5';
-const API_KEY = 'your_openweather_api_key'; // Add to .env in production
+const api = axios.create({
+  baseURL: 'https://api.openweathermap.org/data/2.5',
+  params: {
+    appid: API_KEY,
+    units: 'metric', // or 'imperial' for Fahrenheit
+  },
+});
 
-export const fetchWeather = async (location) => {
-  const { data } = await axios.get(`${API_URL}/weather`, {
-    params: {
-      q: location,
-      appid: API_KEY,
-    },
-  });
-  return data;
+// Fetch current weather by city name
+export const getWeatherByCity = async (city) => {
+  const response = await api.get('/weather', { params: { q: city } });
+  return response.data;
 };
+
+// Fetch 5-day forecast by city name
+export const getForecastByCity = async (city) => {
+  const response = await api.get('/forecast', { params: { q: city } });
+  return response.data.list; // Extracting list of forecasts
+};
+
+// Export axios instance for custom use if needed
+export default api;
