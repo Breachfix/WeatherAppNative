@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Button,
   ActivityIndicator,
+  FlatList,
+  Image,
 } from 'react-native';
 import { WeatherContext } from '../context/WeatherContext';
 import SearchBar from '../components/SearchBar';
@@ -19,6 +21,41 @@ const Home = () => {
   useEffect(() => {
     if (weatherData) fetchForecast(weatherData.name);
   }, [weatherData, unit]);
+
+  // Function to get the name of the day
+  const getDayName = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  };
+
+  // Render a forecast item
+  const renderForecastItem = ({ item }) => (
+    <View style={styles.forecastBox}>
+      {/* Day Name */}
+      <Text style={styles.day}>
+        <Icon name="calendar-alt" style={styles.icon} /> {getDayName(item.dt_txt)}
+      </Text>
+      {/* Weather Icon */}
+      <Image
+        source={{
+          uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`,
+        }}
+        style={styles.weatherIcon}
+      />
+      {/* Temperature */}
+      <Text style={styles.temperature}>
+        <Icon name="thermometer-half" style={styles.icon} /> {item.main.temp}°{unit === 'metric' ? 'C' : 'F'}
+      </Text>
+      {/* Humidity */}
+      <Text style={styles.details}>
+        <Icon name="tint" style={styles.icon} /> Humidity: {item.main.humidity}%
+      </Text>
+      {/* Rain Volume */}
+      <Text style={styles.details}>
+        <Icon name="cloud-rain" style={styles.icon} /> Rain: {item.rain?.['3h'] || 0} mm
+      </Text>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -49,7 +86,9 @@ const Home = () => {
             </View>
             <View style={styles.weatherDetail}>
               <Icon name="wind" style={styles.icon} />
-              <Text>Wind Speed: {weatherData.wind.speed} {unit === 'metric' ? 'm/s' : 'mph'}</Text>
+              <Text>
+                Wind Speed: {weatherData.wind.speed} {unit === 'metric' ? 'm/s' : 'mph'}
+              </Text>
             </View>
             <View style={styles.weatherDetail}>
               <Icon name="moon" style={styles.icon} />
@@ -59,19 +98,15 @@ const Home = () => {
         )}
         {forecastData && (
           <View>
-            <Text style={styles.title}>Forecast</Text>
-            {forecastData.map((forecast, index) => (
-              <View key={index} style={styles.forecastItem}>
-                <Text>
-                  Date: {new Date(forecast.dt_txt).toLocaleDateString()}{" "}
-                  {new Date(forecast.dt_txt).toLocaleTimeString()}
-                </Text>
-                <Text>
-                  Temp: {forecast.main.temp}°{unit === 'metric' ? 'C' : 'F'}
-                </Text>
-                <Text>Humidity: {forecast.main.humidity}%</Text>
-              </View>
-            ))}
+            <Text style={styles.title}>5-Day Forecast</Text>
+            <FlatList
+              data={forecastData.filter((item, index) => index < 5)} // Limit to 5 items
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={renderForecastItem}
+              horizontal={true} // Horizontal scrolling
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.forecastContainer}
+            />
           </View>
         )}
       </ScrollView>
@@ -105,15 +140,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 5,
   },
-  forecastItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
+  forecastContainer: {
+    marginTop: 10,
+  },
+  forecastBox: {
+    width: 150,
+    padding: 15,
+    marginRight: 10,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    alignItems: 'center',
+  },
+  day: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  weatherIcon: {
+    width: 50,
+    height: 50,
+    marginBottom: 10,
+  },
+  temperature: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#e74c3c',
+    marginBottom: 5,
+  },
+  details: {
+    fontSize: 12,
+    color: '#555',
+    marginBottom: 3,
+    textAlign: 'center',
   },
   icon: {
-    fontSize: 18,
-    marginRight: 10,
-    color: '#007AFF',
+    marginRight: 5,
+    fontSize: 14,
+    color: '#555',
   },
   error: {
     color: '#ff3b30',

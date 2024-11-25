@@ -1,41 +1,28 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, Animated } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { WeatherContext } from '../context/WeatherContext';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 const Forecast = () => {
-  const { forecastData, unit } = useContext(WeatherContext);
-  const [animations, setAnimations] = useState([]);
+  const { forecastData, currentWeather, unit } = useContext(WeatherContext);
 
-  useEffect(() => {
-    // Initialize animations for forecast items
-    setAnimations(forecastData.map(() => new Animated.Value(0)));
-  }, [forecastData]);
+  // Function to get the name of the day (e.g., Monday, Tuesday)
+  const getDayName = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  };
 
-  useEffect(() => {
-    // Animate forecast items as they appear
-    animations.forEach((anim, index) => {
-      Animated.timing(anim, {
-        toValue: 1,
-        duration: 500,
-        delay: index * 100,
-        useNativeDriver: true,
-      }).start();
-    });
-  }, [animations]);
+  // Process the daily forecast data to show only 7 days
+  const dailyForecast = forecastData
+    .filter((item) => item.dt_txt.includes('12:00:00')) // Filter forecasts for midday
+    .slice(0, 7); // Limit to 7 days
 
-  const renderForecastItem = ({ item, index }) => (
-    <Animated.View
-      style={[
-        styles.forecastDay,
-        { opacity: animations[index], transform: [{ translateY: animations[index].interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] },
-      ]}
-    >
-      {/* Day and Date */}
+  const renderForecastItem = ({ item }) => (
+    <View style={styles.forecastBox}>
+      {/* Day Name */}
       <Text style={styles.day}>
-        <Icon name="calendar-alt" style={styles.icon} /> {new Date(item.dt_txt).toLocaleDateString('en-US', { weekday: 'long' })}
+        <Icon name="calendar-alt" style={styles.icon} /> {getDayName(item.dt_txt)}
       </Text>
-
       {/* Weather Icon */}
       <Image
         source={{
@@ -43,31 +30,37 @@ const Forecast = () => {
         }}
         style={styles.weatherIcon}
       />
-
       {/* Temperature */}
       <Text style={styles.temperature}>
-        <Icon name="thermometer-half" style={styles.icon} /> {item.main.temp}°{unit === 'metric' ? 'C' : 'F'}
+        <Icon name="thermometer-half" style={styles.icon} /> {item.main.temp.toFixed(1)}°{unit === 'metric' ? 'C' : 'F'}
       </Text>
-
-      {/* Additional Details */}
-      <View style={styles.details}>
-        <Text>
-          <Icon name="tint" style={styles.icon} /> Humidity: {item.main.humidity}%
-        </Text>
-        <Text>
-          <Icon name="cloud-rain" style={styles.icon} /> Rain: {item.rain?.['3h'] || 0} mm
-        </Text>
-      </View>
-    </Animated.View>
+      {/* Humidity */}
+      <Text style={styles.details}>
+        <Icon name="tint" style={styles.icon} /> Humidity: {item.main.humidity}%
+      </Text>
+      {/* Rain Volume */}
+      <Text style={styles.details}>
+        <Icon name="cloud-rain" style={styles.icon} /> Rain: {item.rain?.['3h'] || 0} mm
+      </Text>
+      {/* Sunrise and Sunset */}
+      <Text style={styles.details}>
+        <Icon name="sun" style={styles.icon} /> Sunrise: {new Date(currentWeather.sys.sunrise * 1000).toLocaleTimeString()}
+      </Text>
+      <Text style={styles.details}>
+        <Icon name="moon" style={styles.icon} /> Sunset: {new Date(currentWeather.sys.sunset * 1000).toLocaleTimeString()}
+      </Text>
+    </View>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Next 5-Day Forecast</Text>
+      <Text style={styles.title}>7-Day Forecast</Text>
       <FlatList
-        data={forecastData.filter((item) => item.dt_txt.includes('12:00:00'))}
+        data={dailyForecast}
         renderItem={renderForecastItem}
         keyExtractor={(item, index) => index.toString()}
+        horizontal={true} // Show items horizontally
+        showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.forecastContainer}
       />
     </View>
@@ -76,9 +69,7 @@ const Forecast = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    marginVertical: 20,
   },
   title: {
     fontSize: 18,
@@ -87,51 +78,50 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   forecastContainer: {
-    justifyContent: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 20, // Supported in newer versions of React Native
+    paddingHorizontal: 10,
   },
-  forecastDay: {
-    width: 180,
-    minHeight: 280,
-    padding: 20,
-    borderRadius: 12,
-    backgroundColor: '#b5cfea', // Default light theme
+  forecastBox: {
+    width: 150,
+    padding: 15,
+    marginRight: 10,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 14,
-    justifyContent: 'space-around',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
     alignItems: 'center',
-    transform: [{ translateY: 20 }],
-    opacity: 0,
   },
   day: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: '#333',
-    textAlign: 'center',
+    marginBottom: 5,
   },
   weatherIcon: {
-    width: 55,
-    height: 55,
-    marginVertical: 10,
+    width: 50,
+    height: 50,
+    marginBottom: 10,
   },
   temperature: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
-    color: '#ff6347', // Tomato color
+    color: '#e74c3c',
+    marginBottom: 5,
   },
   details: {
-    alignItems: 'center',
-    gap: 6,
+    fontSize: 12,
     color: '#555',
+    marginBottom: 3,
+    textAlign: 'center',
   },
   icon: {
-    fontSize: 16,
-    marginRight: 6,
-    color: '#007bff',
+    marginRight: 5,
+    fontSize: 14,
+    color: '#555',
   },
 });
 

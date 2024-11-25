@@ -1,18 +1,18 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { SafeAreaView, StyleSheet, Platform, StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Home from './src/pages/Home';
 import About from './src/pages/About';
 import Contact from './src/pages/Contact';
-import { WeatherProvider } from './src/context/WeatherContext'; // Import WeatherProvider
+import { WeatherProvider } from './src/context/WeatherContext';
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
-    <WeatherProvider> {/* Wrap the app in WeatherProvider */}
+    <WeatherProvider>
       <SafeAreaView style={styles.safeArea}>
         <NavigationContainer>
           <Tab.Navigator
@@ -27,6 +27,17 @@ export default function App() {
               tabBarActiveTintColor: '#007AFF',
               tabBarInactiveTintColor: 'gray',
               headerShown: false,
+              tabBarStyle: {
+                position: 'absolute',
+                backgroundColor: '#f5f5f5', // Desired background color
+                height: Platform.OS === 'ios' ? 80 : 60,
+                borderTopWidth: 0, // No border for seamless look
+                shadowColor: '#000',
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+                shadowOffset: { height: -1 }, // Slight shadow for elevation
+                elevation: 5, // Android shadow
+              },
             })}
           >
             <Tab.Screen name="Home" component={Home} />
@@ -37,11 +48,13 @@ export default function App() {
       </SafeAreaView>
     </WeatherProvider>
   );
+  
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
 });
