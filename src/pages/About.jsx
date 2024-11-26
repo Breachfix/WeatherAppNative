@@ -1,12 +1,14 @@
-// src/pages/About.jsx
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { WeatherContext } from '../context/WeatherContext';
 
 const About = () => {
+  const { theme } = useContext(WeatherContext);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>About WeatherAppNative</Text>
-      <Text style={styles.description}>
+    <View style={[styles.container, { backgroundColor: theme.colors[2] }]}>
+      <Text style={[styles.title, { color: theme.textColor }]}>About WeatherAppNative</Text>
+      <Text style={[styles.description, { color: theme.textColor }]}>
         WeatherAppNative provides real-time weather updates for your favorite cities.
         Built with React Native, it works seamlessly on iOS, Android, and the web.
       </Text>
@@ -27,7 +29,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    color: '#555',
   },
 });
 

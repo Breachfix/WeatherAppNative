@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { WeatherContext } from '../context/WeatherContext';
 
 const Profile = () => {
+  const { theme } = useContext(WeatherContext);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors[0] }]}>
       <Image
         source={{ uri: 'https://via.placeholder.com/100' }}
         style={styles.profileImage}
       />
-      <Text style={styles.name}>John Doe</Text>
-      <Text style={styles.email}>john.doe@example.com</Text>
-      <Text style={styles.description}>
+      <Text style={[styles.name, { color: theme.textColor }]}>John Doe</Text>
+      <Text style={[styles.email, { color: theme.textColor }]}>john.doe@example.com</Text>
+      <Text style={[styles.description, { color: theme.textColor }]}>
         This is your profile page. Manage your account and preferences here.
       </Text>
     </View>

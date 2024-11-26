@@ -1,13 +1,19 @@
-// src/pages/Contact.jsx
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { WeatherContext } from '../context/WeatherContext';
 
 const Contact = () => {
+  const { theme } = useContext(WeatherContext);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Contact Us</Text>
-      <Text style={styles.description}>Email: support@weatherappnative.com</Text>
-      <Text style={styles.description}>Phone: +1-234-567-890</Text>
+    <View style={[styles.container, { backgroundColor: theme.colors[1] }]}>
+      <Text style={[styles.title, { color: theme.textColor }]}>Contact Us</Text>
+      <Text style={[styles.description, { color: theme.textColor }]}>
+        Email: support@weatherappnative.com
+      </Text>
+      <Text style={[styles.description, { color: theme.textColor }]}>
+        Phone: +1-234-567-890
+      </Text>
     </View>
   );
 };
@@ -25,7 +31,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    color: '#555',
   },
 });
 
