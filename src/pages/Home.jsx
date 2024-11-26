@@ -15,7 +15,7 @@ import SearchBar from '../components/SearchBar';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 const Home = () => {
-  const { weatherData, forecastData, fetchForecast, toggleUnit, unit, error } =
+  const { theme, weatherData, forecastData, fetchForecast, toggleUnit, unit, error } =
     useContext(WeatherContext);
 
   useEffect(() => {
@@ -60,6 +60,7 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
+      <Text style={[styles.title, { color: theme.textColor }]}>Welcome to the Home Page</Text>
         <SearchBar />
         <Button
           title={`Switch to ${unit === 'metric' ? 'Fahrenheit' : 'Celsius'}`}
