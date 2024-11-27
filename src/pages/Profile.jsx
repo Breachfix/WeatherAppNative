@@ -1,12 +1,15 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { WeatherContext } from '../context/WeatherContext';
+import BackButton from '../components/BackButton';
 
-const Profile = () => {
+
+const Profile = ({ navigation }) => {
   const { theme } = useContext(WeatherContext);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors[0] }]}>
+        <BackButton navigation={navigation} />
       <Image
         source={{ uri: 'https://via.placeholder.com/100' }}
         style={styles.profileImage}
