@@ -23,6 +23,7 @@ const About = () => {
         Thank you for using WeatherAppNative. We are committed to making weather forecasting better 
         and more accessible for everyone!
       </Text>
+      
     </ScrollView>
   );
 };

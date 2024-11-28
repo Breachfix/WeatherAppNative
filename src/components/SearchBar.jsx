@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderRadius: 10,
     paddingHorizontal: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent background
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background
     elevation: 4,
   },
   icon: {
