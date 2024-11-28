@@ -1,4 +1,3 @@
-
 import React, { useContext, useEffect } from 'react';
 import {
   SafeAreaView,
@@ -10,12 +9,22 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import { WeatherContext } from '../context/WeatherContext';
+import { WeatherContext, WeatherContextProps } from '../context/WeatherContext';
 import SearchBar from '../components/SearchBar';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
-const Home = () => {
+const Home: React.FC = () => {
+  const context = useContext<WeatherContextProps | undefined>(WeatherContext);
+
+  if (!context) {
+    return (
+      <SafeAreaView style={styles.errorContainer}>
+        <Text style={styles.errorText}>Weather data not available</Text>
+      </SafeAreaView>
+    );
+  }
+
   const {
     theme,
     weatherData,
@@ -24,56 +33,49 @@ const Home = () => {
     toggleUnit,
     unit,
     error,
-  } = useContext(WeatherContext);
+  } = context;
 
   useEffect(() => {
     if (weatherData) fetchForecast(weatherData.name);
-  }, [weatherData, unit]);
+  }, [weatherData, unit, fetchForecast]);
 
-  const getDayName = (dateString) => {
+  const getDayName = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { weekday: 'long' });
   };
 
-  const renderForecastItem = ({ item }) => (
+  const renderForecastItem = ({ item }: { item: any }) => (
     <LinearGradient
-      colors={['rgba(255,255,255,0.8)', theme.colors[1]]}
+      colors={['rgba(255,255,255,0.8)', theme.colors[1]] as [string, string]}
       style={styles.forecastBox}
     >
-      {/* Day Name */}
       <Text style={[styles.day, { color: theme.textColor }]}>
         <Icon name="calendar-alt" style={styles.icon} /> {getDayName(item.dt_txt)}
       </Text>
-      {/* Weather Icon */}
       <Image
         source={{
           uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`,
         }}
         style={styles.weatherIcon}
       />
-      {/* Temperature */}
       <Text style={[styles.temperature, { color: '#ff6347' }]}>
         <Icon name="thermometer-half" style={styles.icon} /> {item.main.temp}°{unit === 'metric' ? 'C' : 'F'}
       </Text>
-      {/* Humidity */}
       <Text style={[styles.details, { color: theme.textColor }]}>
         <Icon name="tint" style={styles.icon} /> Humidity: {item.main.humidity}%
       </Text>
-      {/* Wind Speed */}
       <Text style={[styles.details, { color: theme.textColor }]}>
         <Icon name="wind" style={styles.icon} /> Wind: {item.wind.speed} {unit === 'metric' ? 'm/s' : 'mph'}
       </Text>
-      {/* Rain Volume */}
       <Text style={[styles.details, { color: theme.textColor }]}>
         <Icon name="cloud-rain" style={styles.icon} /> Rain: {item.rain?.['3h'] || 0} mm
       </Text>
-      
     </LinearGradient>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <LinearGradient colors={theme.colors} style={styles.gradientBackground}>
+      <LinearGradient colors={theme.colors as [string, string]} style={styles.gradientBackground}>
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={[styles.title, { color: theme.textColor }]}>
             🌤️ Welcome to the Weather App
@@ -86,8 +88,6 @@ const Home = () => {
             Switch to {unit === 'metric' ? 'Fahrenheit' : 'Celsius'}
           </Text>
           {error && <Text style={styles.error}>{error}</Text>}
-
-          {/* Current Weather */}
           {weatherData && (
             <View style={[styles.weatherBox, { backgroundColor: theme.colors[0] }]}>
               <Text style={[styles.weatherTitle, { color: theme.textColor }]}>
@@ -119,8 +119,6 @@ const Home = () => {
               </View>
             </View>
           )}
-
-          {/* 5-Day Forecast */}
           {forecastData && (
             <FlatList
               data={forecastData.filter((_, index) => index % 8 === 0)}
@@ -131,7 +129,6 @@ const Home = () => {
               contentContainerStyle={styles.forecastContainer}
             />
           )}
-
           {!weatherData && <ActivityIndicator size="large" color="#007AFF" />}
         </ScrollView>
       </LinearGradient>
@@ -227,6 +224,15 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 8,
     fontSize: 14,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#e74c3c',
   },
 });
 

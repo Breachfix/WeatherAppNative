@@ -1,15 +1,28 @@
-
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { WeatherContext } from '../context/WeatherContext';
+import { WeatherContext, WeatherContextProps } from '../context/WeatherContext';
 import BackButton from '../components/BackButton';
 
-const TermsOfService = ({navigation}) => {
-  const { theme } = useContext(WeatherContext);
+interface TermsOfServiceProps {
+  navigation: any; // Replace `any` with a more specific navigation type if available
+}
+
+const TermsOfService: React.FC<TermsOfServiceProps> = ({ navigation }) => {
+  const context = useContext<WeatherContextProps | undefined>(WeatherContext);
+
+  if (!context) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Unable to load theme data</Text>
+      </View>
+    );
+  }
+
+  const { theme } = context;
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-         <BackButton navigation={navigation} />
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors[0] }]}>
+      <BackButton navigation={navigation} />
       <Text style={[styles.title, { color: theme.textColor }]}>Terms of Service</Text>
 
       <Text style={[styles.sectionTitle, { color: theme.textColor }]}>1. Agreement to Terms</Text>
@@ -77,6 +90,15 @@ const styles = StyleSheet.create({
     marginTop: 30,
     fontStyle: 'italic',
     textAlign: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#e74c3c',
   },
 });
 

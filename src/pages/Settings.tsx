@@ -1,9 +1,12 @@
-
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { WeatherContext } from '../context/WeatherContext';
+import { WeatherContext, WeatherContextProps } from '../context/WeatherContext';
 
-const themes = {
+interface SettingsProps {
+  navigation: any; // Replace `any` with specific navigation type if available
+}
+
+const themes: Record<string, { colors: [string, string, ...string[]]; backgroundColor: string; textColor: string }> = {
   light: {
     colors: ['rgba(135, 206, 250, 0.6)', 'rgba(176, 224, 230, 0.6)', 'rgba(240, 248, 255, 0.6)'],
     backgroundColor: 'rgba(240, 248, 255, 0.6)',
@@ -36,15 +39,25 @@ const themes = {
   },
 };
 
-const Settings = ({ navigation }) => {
-    const { theme, setTheme } = useContext(WeatherContext);
-  
-    const handleThemeChange = (themeName) => {
-      setTheme(themes[themeName]);
-    };
+const Settings: React.FC<SettingsProps> = ({ navigation }) => {
+  const context = useContext<WeatherContextProps | undefined>(WeatherContext);
+
+  if (!context) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Unable to load theme data</Text>
+      </View>
+    );
+  }
+
+  const { theme, setTheme } = context;
+
+  const handleThemeChange = (themeName: string) => {
+    setTheme(themes[themeName]);
+  };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors[0] }]}>
       <Text style={[styles.title, { color: theme.textColor }]}>Settings</Text>
       <Text style={[styles.subtitle, { color: theme.textColor }]}>Select a Theme:</Text>
       <View style={styles.themeOptions}>
@@ -78,13 +91,13 @@ const Settings = ({ navigation }) => {
       <TouchableOpacity
         style={[styles.navButton, { backgroundColor: theme.colors[0] }]}
         onPress={() => navigation.navigate('PrivacyPolicy')}
-        >
+      >
         <Text style={[styles.navButtonText, { color: theme.textColor }]}>Privacy Policy</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.navButton, { backgroundColor: theme.colors[0] }]}
         onPress={() => navigation.navigate('TermsOfService')}
-        >
+      >
         <Text style={[styles.navButtonText, { color: theme.textColor }]}>Terms Of Service</Text>
       </TouchableOpacity>
     </View>
@@ -137,6 +150,15 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#e74c3c',
   },
 });
 

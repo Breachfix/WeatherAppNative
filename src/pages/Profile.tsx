@@ -1,15 +1,28 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { WeatherContext } from '../context/WeatherContext';
+import { WeatherContext, WeatherContextProps } from '../context/WeatherContext';
 import BackButton from '../components/BackButton';
 
+interface ProfileProps {
+  navigation: any; // Replace `any` with a more specific navigation type if available
+}
 
-const Profile = ({ navigation }) => {
-  const { theme } = useContext(WeatherContext);
+const Profile: React.FC<ProfileProps> = ({ navigation }) => {
+  const context = useContext<WeatherContextProps | undefined>(WeatherContext);
+
+  if (!context) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Unable to load theme data</Text>
+      </View>
+    );
+  }
+
+  const { theme } = context;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors[0] }]}>
-        <BackButton navigation={navigation} />
+      <BackButton navigation={navigation} />
       <Image
         source={{ uri: 'https://via.placeholder.com/100' }}
         style={styles.profileImage}
@@ -49,6 +62,15 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     textAlign: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#e74c3c',
   },
 });
 
