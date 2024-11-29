@@ -88,7 +88,10 @@ Run the app on an emulator or physical device:
 
 For creating a standalone app, follow Expo’s documentation on building apps.
 
-📁 Project Structure
+
+### 📁 Project Structure
+
+```bash
 
 WeatherAppNative/
 ├── assets/                     # Images, icons, and fonts
@@ -103,6 +106,7 @@ WeatherAppNative/
 ├── app.json                    # Expo configuration
 ├── package.json                # Dependencies and scripts
 └── README.md                   # Project documentation
+```
 
 ### 🧑‍💻 Available Scripts
 
