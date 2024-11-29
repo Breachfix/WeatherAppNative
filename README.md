@@ -127,7 +127,11 @@ API_KEY=your_openweather_api_key
 ### 📸 Screenshots
 
 Screenshots will be added soon to showcase the app’s UI.
-
+<img src="./assets/1.png" alt="WeatherApp page" width="200"/>
+<img src="./assets/2.png" alt="WeatherApp page" width="200"/>
+<img src="./assets/3.png" alt="WeatherApp page" width="200"/>
+<img src="./assets/4.png" alt="WeatherApp page" width="200"/>
+<img src="./assets/5.png" alt="WeatherApp page" width="200"/>
 ### 🤝 Contributing
 
 Contributions are welcome! To contribute:
