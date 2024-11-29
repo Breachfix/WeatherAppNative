@@ -1,15 +1,27 @@
-
-
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { WeatherContext } from '../context/WeatherContext';
+import { WeatherContext, WeatherContextProps } from '../context/WeatherContext';
 import BackButton from '../components/BackButton';
 
-const PrivacyPolicy = ({ navigation }) => {
-  const { theme } = useContext(WeatherContext);
+interface PrivacyPolicyProps {
+  navigation: any; // Replace `any` with the appropriate type if you have a navigation type defined
+}
+
+const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ navigation }) => {
+  const context = useContext<WeatherContextProps | undefined>(WeatherContext);
+
+  if (!context) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Unable to load theme data</Text>
+      </View>
+    );
+  }
+
+  const { theme } = context;
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors[0] }]}>
       <BackButton navigation={navigation} />
       <Text style={[styles.title, { color: theme.textColor }]}>Privacy Policy</Text>
 
@@ -88,6 +100,15 @@ const styles = StyleSheet.create({
     marginTop: 30,
     fontStyle: 'italic',
     textAlign: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#e74c3c',
   },
 });
 
