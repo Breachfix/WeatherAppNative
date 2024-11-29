@@ -132,6 +132,10 @@ Screenshots will be added soon to showcase the app’s UI.
 <img src="./assets/3.png" alt="WeatherApp page" width="200"/>
 <img src="./assets/4.png" alt="WeatherApp page" width="200"/>
 <img src="./assets/5.png" alt="WeatherApp page" width="200"/>
+<img src="./assets/7.png" alt="WeatherApp page" width="200"/>
+<img src="./assets/8.png" alt="WeatherApp page" width="200"/>
+<img src="./assets/9.png" alt="WeatherApp page" width="200"/>
+<img src="./assets/6.png" alt="WeatherApp page" width="200"/>
 ### 🤝 Contributing
 
 Contributions are welcome! To contribute:
