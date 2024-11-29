@@ -2,12 +2,23 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["react-native-dotenv"],
-  
+    "forceConsistentCasingInFileNames": true,
+    "types": [
+      "react-native-dotenv"
+    ]
   },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ],
   "extends": "expo/tsconfig.base"
 }

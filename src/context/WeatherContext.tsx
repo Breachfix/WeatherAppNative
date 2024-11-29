@@ -1,159 +1,3 @@
-
-
-// import React, { createContext, useState, useEffect, ReactNode } from 'react';
-// import axios from 'axios';
-// import * as Location from 'expo-location';
-// import { API_KEY } from '@env';
-
-// // Define the structure of the context's value
-// export interface WeatherContextProps {
-//   theme: {
-//     colors: [string, string, ...string[]];
-//     textColor: string;
-//   };
-//   setTheme: React.Dispatch<
-//     React.SetStateAction<{
-//       colors: string[];
-//       textColor: string;
-//     }>
-//   >;
-//   weatherData: any;
-//   forecastData: any[];
-//   fetchWeather: (city: string) => Promise<void>;
-//   fetchForecast: (city: string) => Promise<void>;
-//   toggleUnit: () => void;
-//   unit: string;
-//   error: string | null;
-//   currentWeather: any;
-// }
-
-// // Default theme
-// const defaultTheme = {
-//   colors: ['#ffffff', '#ffffff'], // Default gradient
-//   textColor: '#000',
-// };
-
-// // Create the context
-// export const WeatherContext = createContext<WeatherContextProps | undefined>(
-//   undefined
-// );
-
-// interface WeatherProviderProps {
-//   children: ReactNode;
-// }
-
-// // Provider Component
-// export const WeatherProvider: React.FC<WeatherProviderProps> = ({ children }) => {
-//   const [theme, setTheme] = useState(defaultTheme);
-//   const [weatherData, setWeatherData] = useState<any>(null);
-//   const [forecastData, setForecastData] = useState<any[]>([]);
-//   const [error, setError] = useState<string | null>(null);
-//   const [unit, setUnit] = useState<string>('metric');
-//   const [lastSearchedCity, setLastSearchedCity] = useState<string | null>(null);
-
-//   const apiKey = API_KEY;
-
-//   const fetchWeather = async (city: string) => {
-//     setError(null);
-//     setLastSearchedCity(city);
-//     try {
-//       const response = await axios.get(
-//         `https://api.openweathermap.org/data/2.5/weather`,
-//         {
-//           params: {
-//             q: city,
-//             appid: apiKey,
-//             units: unit,
-//           },
-//         }
-//       );
-//       setWeatherData(response.data);
-//     } catch (err) {
-//       setError('Could not fetch weather data. Please try again.');
-//     }
-//   };
-
-//   const fetchForecast = async (city: string) => {
-//     setError(null);
-//     try {
-//       const response = await axios.get(
-//         `https://api.openweathermap.org/data/2.5/forecast`,
-//         {
-//           params: {
-//             q: city,
-//             appid: apiKey,
-//             units: unit,
-//           },
-//         }
-//       );
-//       setForecastData(response.data.list);
-//     } catch (err) {
-//       setError('Could not fetch forecast data. Please try again.');
-//     }
-//   };
-
-//   const toggleUnit = () => {
-//     setUnit((prevUnit) => (prevUnit === 'metric' ? 'imperial' : 'metric'));
-//   };
-
-//   useEffect(() => {
-//     if (lastSearchedCity) {
-//       fetchWeather(lastSearchedCity);
-//       fetchForecast(lastSearchedCity);
-//     }
-//   }, [unit]);
-
-//   useEffect(() => {
-//     const getLocationWeather = async () => {
-//       const { status } = await Location.requestForegroundPermissionsAsync();
-//       if (status !== 'granted') {
-//         setError('Permission to access location was denied.');
-//         return;
-//       }
-//       try {
-//         const location = await Location.getCurrentPositionAsync({});
-//         const { latitude, longitude } = location.coords;
-//         const response = await axios.get(
-//           `https://api.openweathermap.org/data/2.5/weather`,
-//           {
-//             params: {
-//               lat: latitude,
-//               lon: longitude,
-//               appid: apiKey,
-//               units: unit,
-//             },
-//           }
-//         );
-//         setWeatherData(response.data);
-//       } catch (err) {
-//         setError('Could not fetch location-based weather. Please try again.');
-//       }
-//     };
-
-//     if (!lastSearchedCity) {
-//       getLocationWeather();
-//     }
-//   }, [lastSearchedCity]);
-
-//   return (
-//     <WeatherContext.Provider
-//       value={{
-//         theme,
-//         setTheme,
-//         weatherData,
-//         forecastData,
-//         fetchWeather,
-//         fetchForecast,
-//         toggleUnit,
-//         unit,
-//         error,
-//         currentWeather: weatherData,
-//       }}
-//     >
-//       {children}
-//     </WeatherContext.Provider>
-//   );
-// };
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 import * as Location from 'expo-location';
@@ -169,14 +13,37 @@ export interface Theme {
 export interface WeatherContextProps {
   theme: Theme;
   setTheme: React.Dispatch<React.SetStateAction<Theme>>;
-  weatherData: any; // Replace with specific type if available
-  forecastData: any[]; // Replace with specific type if available
+  weatherData: WeatherData | null;
+  forecastData: ForecastData[];
   fetchWeather: (city: string) => Promise<void>;
   fetchForecast: (city: string) => Promise<void>;
   toggleUnit: () => void;
   unit: 'metric' | 'imperial';
   error: string | null;
-  currentWeather: any; // Replace with specific type if available
+  currentWeather: WeatherData | null;
+}
+
+// Define types for weather and forecast data
+export interface WeatherData {
+  name: string;
+  main: {
+    temp: number;
+    humidity: number;
+  };
+  sys: {
+    sunrise: number;
+    sunset: number;
+  };
+  weather: Array<{ description: string; icon: string }>;
+}
+
+export interface ForecastData {
+  dt_txt: string;
+  main: {
+    temp: number;
+    humidity: number;
+  };
+  weather: Array<{ description: string; icon: string }>;
 }
 
 // Default theme
@@ -186,19 +53,20 @@ const defaultTheme: Theme = {
 };
 
 // Create the context
-export const WeatherContext = createContext<WeatherContextProps | undefined>(
-  undefined
-);
+export const WeatherContext = createContext<WeatherContextProps | undefined>(undefined);
 
 interface WeatherProviderProps {
   children: ReactNode;
 }
 
+// Helper function to check if two objects are different
+const isDataDifferent = (prev: any, next: any): boolean => JSON.stringify(prev) !== JSON.stringify(next);
+
 // Provider Component
 export const WeatherProvider: React.FC<WeatherProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(defaultTheme);
-  const [weatherData, setWeatherData] = useState<any>(null);
-  const [forecastData, setForecastData] = useState<any[]>([]);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [forecastData, setForecastData] = useState<ForecastData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [unit, setUnit] = useState<'metric' | 'imperial'>('metric');
   const [lastSearchedCity, setLastSearchedCity] = useState<string | null>(null);
@@ -210,17 +78,12 @@ export const WeatherProvider: React.FC<WeatherProviderProps> = ({ children }) =>
     setError(null);
     setLastSearchedCity(city);
     try {
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather`,
-        {
-          params: {
-            q: city,
-            appid: apiKey,
-            units: unit,
-          },
-        }
-      );
-      setWeatherData(response.data);
+      const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
+        params: { q: city, appid: apiKey, units: unit },
+      });
+      if (isDataDifferent(weatherData, response.data)) {
+        setWeatherData(response.data);
+      }
     } catch (err) {
       setError('Could not fetch weather data. Please try again.');
     }
@@ -230,17 +93,12 @@ export const WeatherProvider: React.FC<WeatherProviderProps> = ({ children }) =>
   const fetchForecast = async (city: string) => {
     setError(null);
     try {
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast`,
-        {
-          params: {
-            q: city,
-            appid: apiKey,
-            units: unit,
-          },
-        }
-      );
-      setForecastData(response.data.list);
+      const response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast`, {
+        params: { q: city, appid: apiKey, units: unit },
+      });
+      if (isDataDifferent(forecastData, response.data.list)) {
+        setForecastData(response.data.list);
+      }
     } catch (err) {
       setError('Could not fetch forecast data. Please try again.');
     }
@@ -251,7 +109,7 @@ export const WeatherProvider: React.FC<WeatherProviderProps> = ({ children }) =>
     setUnit((prevUnit) => (prevUnit === 'metric' ? 'imperial' : 'metric'));
   };
 
-  // Fetch weather and forecast when unit changes
+  // Fetch weather and forecast when the unit changes
   useEffect(() => {
     if (lastSearchedCity) {
       fetchWeather(lastSearchedCity);
@@ -270,25 +128,19 @@ export const WeatherProvider: React.FC<WeatherProviderProps> = ({ children }) =>
       try {
         const location = await Location.getCurrentPositionAsync({});
         const { latitude, longitude } = location.coords;
-        const response = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather`,
-          {
-            params: {
-              lat: latitude,
-              lon: longitude,
-              appid: apiKey,
-              units: unit,
-            },
-          }
-        );
-        setWeatherData(response.data);
+        const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
+          params: { lat: latitude, lon: longitude, appid: apiKey, units: unit },
+        });
+        if (isDataDifferent(weatherData, response.data)) {
+          setWeatherData(response.data);
+        }
       } catch (err) {
         setError('Could not fetch location-based weather. Please try again.');
       }
     };
 
     if (!lastSearchedCity) {
-      getLocationWeather();
+      getLocationWeather().catch(() => setError('Could not fetch initial weather data.'));
     }
   }, [lastSearchedCity]);
 

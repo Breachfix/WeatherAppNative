@@ -1,3 +1,3 @@
 declare module '@env' {
-    export const API_KEY: "94fb27c0c12d4873cf9ce9afc8887574";
+    export const API_KEY: "4b7f800639b82ebd4666d9ed5c01867a";
   }
